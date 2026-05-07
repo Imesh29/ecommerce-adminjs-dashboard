@@ -3,20 +3,20 @@ require("dotenv").config();
 import express, { json } from "express";
 import cors from "cors";
 
-import { sync } from "./config/db";
+import { sync } from "./config/db.js";
 
 /*
 MODELS
 */
 
-import User, { hasMany, findOne, create } from "./models/User";
-import Product, { belongsTo, hasMany as _hasMany } from "./models/Product";
-import Category, { hasMany as __hasMany } from "./models/Category";
+import User, { hasMany, findOne, create } from "./models/User.js";
+import Product, { belongsTo, hasMany as _hasMany } from "./models/Product.js";
+import Category, { hasMany as __hasMany } from "./models/Category.js";
 import Order, {
   belongsTo as _belongsTo,
   hasMany as ___hasMany,
-} from "./models/Order";
-import OrderItem, { belongsTo as __belongsTo } from "./models/OrderItem";
+} from "./models/Order.js";
+import OrderItem, { belongsTo as __belongsTo } from "./models/OrderItem.js";
 
 /*
 RELATIONSHIPS
