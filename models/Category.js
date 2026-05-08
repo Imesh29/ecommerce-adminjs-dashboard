@@ -1,8 +1,15 @@
 import { DataTypes } from "sequelize";
-import { define } from "../config/db";
+import sequelize from "../config/db.js";
 
-const Category = define("Category", {
-  name: DataTypes.STRING,
+const Category = sequelize.define("Category", {
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+
+  description: {
+    type: DataTypes.TEXT,
+  },
 });
 
 export default Category;

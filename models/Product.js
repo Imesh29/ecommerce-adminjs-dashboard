@@ -1,14 +1,35 @@
 import { DataTypes } from "sequelize";
-import { define } from "../config/db";
-import Category, { hasMany } from "./Category";
 
-const Product = define("Product", {
-  name: DataTypes.STRING,
-  price: DataTypes.FLOAT,
-  stock: DataTypes.INTEGER,
+import sequelize from "../config/db.js";
+
+const Product = sequelize.define("Product", {
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+
+  description: {
+    type: DataTypes.TEXT,
+  },
+
+  price: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+  },
+
+  stock: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
+
+  /*
+  FOREIGN KEY
+  */
+
+  CategoryId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
 });
-
-hasMany(Product);
-Product.belongsTo(Category);
 
 export default Product;

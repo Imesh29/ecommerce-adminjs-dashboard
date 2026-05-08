@@ -1,6 +1,6 @@
-import { count } from "../models/User";
-import { count as _count } from "../models/Product";
-import { count as __count } from "../models/Order";
+import User from "../models/User.js";
+import Product from "../models/Product.js";
+import Order from "../models/Order.js";
 
 const dashboardHandler = async () => {
   const totalUsers = await count();

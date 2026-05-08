@@ -1,9 +1,17 @@
 import { DataTypes } from "sequelize";
-import { define } from "../config/db";
+import sequelize from "../config/db.js";
 
-const Setting = define("Setting", {
-  key: DataTypes.STRING,
-  value: DataTypes.STRING,
+const Setting = sequelize.define("Setting", {
+  key: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+
+  value: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
 });
 
 export default Setting;

@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { compare } from "bcryptjs";
 
-import { findOne } from "../models/User";
-import generateToken from "../utils/generateToken";
+import User from "../models/User.js";
+import generateToken from "../utils/generateToken.js";
 
 const router = Router();
 
@@ -14,7 +14,7 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await findOne({
+    const user = await User.findOne({
       where: { email },
     });
 

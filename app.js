@@ -1,94 +1,151 @@
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 
-import express, { json } from "express";
+import express from "express";
 import cors from "cors";
 
-import { sync } from "./config/db.js";
+import sequelize from "./config/db.js";
 
 /*
 MODELS
 */
 
-import User, { hasMany, findOne, create } from "./models/User.js";
-import Product, { belongsTo, hasMany as _hasMany } from "./models/Product.js";
-import Category, { hasMany as __hasMany } from "./models/Category.js";
-import Order, {
-  belongsTo as _belongsTo,
-  hasMany as ___hasMany,
-} from "./models/Order.js";
-import OrderItem, { belongsTo as __belongsTo } from "./models/OrderItem.js";
+import User from "./models/User.js";
+import Product from "./models/Product.js";
+import Category from "./models/Category.js";
+import Order from "./models/Order.js";
+import OrderItem from "./models/OrderItem.js";
 
-/*
-RELATIONSHIPS
-*/
+Category.hasMany(Product, {
+  foreignKey: "CategoryId",
+});
 
-__hasMany(Product);
-belongsTo(Category);
+Product.belongsTo(Category, {
+  foreignKey: "CategoryId",
+});
 
-hasMany(Order);
-_belongsTo(User);
+User.hasMany(Order, {
+  foreignKey: "UserId",
+});
 
-___hasMany(OrderItem);
-__belongsTo(Order);
+Order.belongsTo(User, {
+  foreignKey: "UserId",
+});
 
-_hasMany(OrderItem);
-__belongsTo(Product);
+Order.hasMany(OrderItem, {
+  foreignKey: "OrderId",
+});
 
-/*
-ADMIN PANEL
-*/
+OrderItem.belongsTo(Order, {
+  foreignKey: "OrderId",
+});
 
-import { adminJs, adminRouter } from "./admin/admin";
+Product.hasMany(OrderItem, {
+  foreignKey: "ProductId",
+});
+
+OrderItem.belongsTo(Product, {
+  foreignKey: "ProductId",
+});
+
+import adminData from "./admin/admin.js";
 
 /*
 ROUTES
 */
 
-import authRoutes from "./routes/authRoutes";
+import authRoutes from "./routes/authRoutes.js";
 
 const app = express();
 
-app.use(cors());
+/*
+MIDDLEWARES
+*/
 
-app.use(json());
+app.use(cors());
+app.use(express.json());
+
+/*
+API ROUTES
+*/
 
 app.use("/api", authRoutes);
 
-app.use(adminJs.options.rootPath, adminRouter);
+/*
+ADMIN ROUTES
+*/
+
+app.use(adminData.adminJs.options.rootPath, adminData.adminRouter);
 
 /*
-DATABASE
+HOME ROUTE
 */
 
-sync({ alter: true })
+app.get("/", (req, res) => {
+  res.send("eCommerce Admin Dashboard Running...");
+});
+
+/*
+DATABASE CONNECTION
+*/
+
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log("PostgreSQL Connected Successfully");
+  })
+  .catch((err) => {
+    console.log("Database Authentication Failed");
+    console.log(err);
+  });
+
+/*
+SYNC DATABASE
+*/
+
+sequelize
+  .sync({ alter: true })
+
   .then(async () => {
-    console.log("Database connected");
+    console.log("Database Synced Successfully");
 
     /*
-CREATE DEFAULT ADMIN
-*/
+    CREATE DEFAULT ADMIN
+    */
 
-    const adminExists = await findOne({
+    const adminExists = await User.findOne({
       where: {
         email: "admin@gmail.com",
       },
     });
 
     if (!adminExists) {
-      await create({
+      await User.create({
         name: "Admin",
+
         email: "admin@gmail.com",
+
         password: "123456",
+
         role: "admin",
       });
 
-      console.log("Default admin created");
+      console.log("Default Admin Created");
     }
 
-    app.listen(process.env.PORT, () => {
-      console.log(`Server running on port ${process.env.PORT}`);
+    /*
+    START SERVER
+    */
+
+    const PORT = process.env.PORT || 5000;
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
     });
   })
+
   .catch((err) => {
+    console.log("Database connection failed");
+
     console.log(err);
   });
