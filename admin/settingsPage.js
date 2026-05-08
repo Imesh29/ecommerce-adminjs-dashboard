@@ -1,11 +1,11 @@
-const Setting = require("../models/Setting.js");
+import { findAll } from "../models/Setting";
 
 const settingsHandler = async (request, response, context) => {
-  const settings = await Setting.findAll();
+  const settings = await findAll();
 
   return {
     settings,
   };
 };
 
-module.exports = settingsHandler;
+export default settingsHandler;
