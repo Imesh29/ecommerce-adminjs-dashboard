@@ -1,15 +1,22 @@
-import AdminJS, { registerAdapter } from "adminjs";
+import AdminJS from "adminjs";
 import { buildAuthenticatedRouter } from "@adminjs/express";
 import AdminJSSequelize from "@adminjs/sequelize";
 
-import { User, Product, Category, Order, OrderItem } from "../models";
+import User from "../models/User.js";
+import Product from "../models/Product.js";
+import Category from "../models/Category.js";
+import Order from "../models/Order.js";
+import OrderItem from "../models/OrderItem.js";
 
 import Setting from "../models/Setting.js";
 
-import dashboardHandler from "./dashboard";
-import { json } from "express";
+import dashboardHandler from "./dashbaord.js";
+import bcrypt from "bcryptjs";
 
-registerAdapter(AdminJSSequelize);
+AdminJS.registerAdapter({
+  Resource: AdminJSSequelize.Resource,
+  Database: AdminJSSequelize.Database,
+});
 
 const adminJs = new AdminJS({
   rootPath: "/admin",
@@ -27,13 +34,25 @@ const adminJs = new AdminJS({
       resource: User,
 
       options: {
+        navigation: "Admin Panel",
         properties: {
           password: {
-            isVisible: false,
+            type: "password",
+
+            isVisible: {
+              list: false,
+              filter: false,
+              show: false,
+              edit: true,
+            },
           },
         },
 
         actions: {
+          list: {
+            isAccessible: ({ currentAdmin }) => currentAdmin.role === "admin",
+          },
+
           new: {
             isAccessible: ({ currentAdmin }) => currentAdmin.role === "admin",
           },
@@ -43,10 +62,6 @@ const adminJs = new AdminJS({
           },
 
           delete: {
-            isAccessible: ({ currentAdmin }) => currentAdmin.role === "admin",
-          },
-
-          list: {
             isAccessible: ({ currentAdmin }) => currentAdmin.role === "admin",
           },
         },
@@ -59,6 +74,16 @@ const adminJs = new AdminJS({
 
     {
       resource: Product,
+
+      options: {
+        navigation: "Shop",
+
+        properties: {
+          CategoryId: {
+            isVisible: true,
+          },
+        },
+      },
     },
 
     /*
@@ -75,6 +100,16 @@ const adminJs = new AdminJS({
 
     {
       resource: Order,
+
+      options: {
+        navigation: "Orders",
+
+        properties: {
+          UserId: {
+            isVisible: true,
+          },
+        },
+      },
     },
 
     /*
@@ -83,6 +118,20 @@ const adminJs = new AdminJS({
 
     {
       resource: OrderItem,
+
+      options: {
+        navigation: "Orders",
+
+        properties: {
+          OrderId: {
+            isVisible: true,
+          },
+
+          ProductId: {
+            isVisible: true,
+          },
+        },
+      },
     },
 
     /*
@@ -128,8 +177,6 @@ const adminRouter = buildAuthenticatedRouter(
       });
 
       if (!user) return null;
-
-      const bcrypt = require("bcryptjs");
 
       const matched = await bcrypt.compare(password, user.password);
 
